@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="chrome=1" />
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Emoji Piano</title>
+	  
+		<link rel="stylesheet" type="text/css" href="keyboard.css">    
+	</head>
+
+	<body id="body">
+		<div style="text-align:center;">
+			<h1 style="margin: 0px;">Emoji Piano</h1><br>
+			<p style="margin: 0px;">Share melodies via emojis.</p>
+		</div>
+		<div style="text-align:center;">
+			<textarea cols="100" id="textarea" style="font-size: 18pt; margin-top: 15px;"></textarea>
+		</div>
+		<div style="text-align:center; margin: 15px;" id="controls">
+			<input id="button_play" type="button" value="Play"> 
+			<input id="button_double_note_length" type="button" value="Prolong Note Length"> 
+			<input id="button_halve_note_length" type="button" value="Shorten Note Length"> 
+			<input id="button_insert_rest" type="button" value="Insert Rest"> 
+			<input id="button_clear" type="button" value="Clear">
+		</div>
+		<div id="piano_container"></div>
+		<div style="text-align:center; margin-top: 30px;">
+			<p style="margin: 0px;">To share your melody, copy the emojis from the textarea above or copy this link:<br>
+				<span><a id="score_link" href="https://webaudiotech.com/sites/emoji_piano?score=">https://webaudiotech.com/sites/emoji_piano?score=</span>
+			</p>
+		</div>
+		<div style="text-align:center; margin-top: 30px;">
+			<a href="https://webaudiotech.com">
+				<img style="width: 75px;" src="https://webaudiotech.com/wp-content/uploads/2015/12/cropped-wat_logo_transparent.png">
+			</a>
+		</div>
+		
+		
+		<script src="claviature.js"></script>
+		
+		<script>
+		
+			var g = function(id){
+			
+				return document.getElementById(id);
+			
+			}
+
+			var getFrequency = function(note, detune, masterTune, transpose){
+
+				// note a with concert pitch is on key 49, since we start at key 0, it is key 48
+				var power = note - 48 + transpose + detune;
+
+				var frequency = masterTune * (Math.pow(2,(power/12)));
+
+				return frequency;
+				
+			}
+			
+			var mapEmojis = function(emojiString, mapper){
+			
+				var mapped = [];
+			
+				for (var i=0, len = emojiString.length / 2; i < len; i++){
+				
+					mapped.push(mapper(emojiString[2*i] + emojiString[2*i+1]));
+				
+				}
+				
+				return mapped;
+			
+			}
+			
+			var QueryString = function () {
+			  // This function is anonymous, is executed immediately and 
+			  // the return value is assigned to QueryString!
+			  var query_string = {};
+			  var query = window.location.search.substring(1);
+			  var vars = query.split("&");
+			  for (var i=0;i<vars.length;i++) {
+				var pair = vars[i].split("=");
+					// If first entry with this name
+				if (typeof query_string[pair[0]] === "undefined") {
+				  query_string[pair[0]] = pair[1];
+					// If second entry with this name
+				} else if (typeof query_string[pair[0]] === "string") {
+				  var arr = [ query_string[pair[0]], pair[1] ];
+				  query_string[pair[0]] = arr;
+					// If third or later entry with this name
+				} else {
+				  query_string[pair[0]].push(pair[1]);
+				}
+			  } 
+				return query_string;
+			} ();
+			
+			var refreshScoreLink = function(score){
+			
+				var score_link = g("score_link");
+				var link = "https://webaudiotech.com/sites/emoji_piano?score=" + score;
+				score_link.innerHTML = link;
+				score_link.href = link;
+			
+			}
+			
+			var play = function(){
+			
+				var emojis = textarea.value;
+			
+				var keys = mapEmojis(emojis, function(emoji){
+					
+					if (emoji == "▶️"){
+						return -2;
+					}
+					
+					else if (emoji == "◀️"){
+						return -3;
+					}
+					
+					else {
+						return CLAVIATURE.config.custom_key_names.indexOf(emoji);
+					}
+				
+				});
+				
+				playKeys(keys);
+				
+				console.log(keys);				
+			
+			};
+
+			var textarea = g("textarea");
+			
+			var context = new AudioContext();
+			var oscs = [];
+			var masterGain = context.createGain();
+			masterGain.connect(context.destination);
+			masterGain.gain.value = 0.3;
+		
+			CLAVIATURE.create({
+				container_id: "piano_container",
+				labels: true,
+				custom_key_names: [
+					'🐶', '🐱', '🐭', '🐹', '🐰', '🐻', '🐼', '🐨', '🐯', '🐮', '🐷', '🐽',
+					'🐸', '🐙', '🐵', '🙈', '🙉', '🙊', '🐒', '🐔', '🐧', '🐦', '🐤', '🐣',
+					'🐥', '🐺', '🐗', '🐴', '🐝', '🐛', '🐌', '🐞', '🐜', '🐍', '🐢', '🐠',
+					'🐟', '🐡', '🐬', '🐳', '🐋', '🐊', '🐆', '🐅', '🐃', '🐂', '🐄', '🐪',
+					'🐫', '🐘', '🐐', '🐏', '🐑', '🐎', '🐖', '🐀', '🐁', '🐓', '🐕', '🐩',
+					'🐈', '🐇', '🐾', '🐉', '🐲', '🌵', '🎄', '🌲', '🌳', '🌴', '🌱', '🌿',
+					'☘', '🍀', '🎍', '🎋', '🍃', '🍂', '🍁', '🌾', '🌺', '🌻', '🌹', '🌷',
+					'🌼', '🌸', '💐', '🍄', '🌰', '🎃', '🐚', '🌎', '🌍', '🌏', '🌗', '🌘',
+					'💫', '☄', '☀️', '⛅️', '☁️', '⚡️', '🔥', '💥', '❄️', '🔥', '💥', '❄️',
+					'☃️', '⛄️', '💨', '☂️', '☔️', '💧', '💦', '🌊', '🍏', '🍎', '🍐', '🍊',
+					'🍋', '🍌', '🍉', '🍇', '🍓', '🍈', '🍒', '🍑', '🍍', '🍅', '🍆', '🌽',
+					'🍠', '🍯', '🍞', '🍗', '🍖', '🍤', '🍳', '🍔', '🍟', '🍕', '🍝', '🍜',
+					'🍲', '🍥', '🍣', '🍱', '🍛', '🍙', '🍚', '🍘', '🍢', '🍡', '🍧', '🍨'
+				],
+				onactivate: function(key, note){
+					
+					keyDown(key, note);
+					
+				},
+				ondeactivate: function(key, note){
+				
+					keyUp(key, note);
+					
+				}
+			});
+			
+			
+			var midiAccess;
+
+			//start up midi api
+			var onMIDIInit = function(midi) {
+				midiAccess = midi;
+				console.log("MIDI initialized!");
+
+				var inputs = midiAccess.inputs;
+				
+				if (inputs.size === 0){
+					console.log("No MIDI input devices present.")
+				}
+				
+				else { // Hook the message handler for all MIDI inputs
+				
+					console.log("MIDI initialized and ready. There are " + inputs.size + " inputs!");
+					
+					for (var input of inputs){
+						console.log(input[1]);
+						console.log("Found MIDI input: " + input[1].manufacturer + ", " + input[1].name);
+						input[1].onmidimessage = MIDIMessageEventHandler;
+					}
+					
+					
+					
+				}
+			};
+			
+			var onMIDIReject = function(err) {
+				console.log("The MIDI system failed to start.");
+			};	
+			
+			console.log("Requesting MIDI access");
+
+			if (navigator.requestMIDIAccess){
+				navigator.requestMIDIAccess().then( onMIDIInit, onMIDIReject );
+			}
+
+			else {
+				console.log("No MIDI support present in your browser.")
+			}
+
+
+			var MIDIMessageEventHandler = function(event) {
+
+				// Mask off the lower nibble (MIDI channel, which we don't care about)
+				switch (event.data[0] & 0xf0) {
+				
+					case 0x90:
+						if (event.data[2] != 0) {  // if velocity != 0, this is a note-on message
+							keyDown(event.data[1]-21);
+							return;
+						}
+						
+						// if velocity == 0, fall thru: it's a note-off.  MIDI's weird, ya'll.
+					case 0x80:
+						keyUp(event.data[1]-21);
+						return;
+				}
+				
+			};
+			
+			
+			var keyDown = function(key){
+				
+				textarea.value += CLAVIATURE.config.custom_key_names[key];				
+				refreshScoreLink(textarea.value);
+				
+				var osc = context.createOscillator();
+				osc.type = "triangle";					
+				osc.frequency.value = getFrequency(key, 0, 440, 0);
+				osc.connect(masterGain);
+				osc.start();
+				oscs[key] = osc;
+				
+			}
+
+			var keyUp = function(key, note){
+				
+				if (oscs[key]){
+					
+					oscs[key].stop();
+					delete(oscs[key]);
+			
+				}
+				
+			}
+			
+			g("button_clear").addEventListener("click", function(){
+			
+				textarea.value = "";
+				refreshScoreLink("");
+			
+			});
+			
+			g("button_play").addEventListener("click", function(){
+			
+				play();
+			
+			});
+			
+			
+			g("button_insert_rest").addEventListener("click", function(){
+			
+				textarea.value += "◼️";
+				refreshScoreLink(textarea.value);
+			
+			});
+
+			
+			g("button_double_note_length").addEventListener("click", function(){
+			
+				textarea.value += "▶️";
+				refreshScoreLink(textarea.value);
+			
+			});	
+
+			
+			g("button_halve_note_length").addEventListener("click", function(){
+			
+				textarea.value += "◀️";
+				refreshScoreLink(textarea.value);
+			
+			});	
+			
+			
+			var playKeys = function(keys){
+			
+				var quarterNoteTime = 0.5;
+				var note_start_time = context.currentTime + 0.2;
+				
+				var length = keys.length;
+			
+				for (var i = 0; i < length; i++){
+					
+					if (keys[i] < 0){
+						continue;
+					}
+					
+					var osc = context.createOscillator();
+					osc.type = "triangle";					
+					osc.frequency.value = getFrequency(keys[i], 0, 440, 0);
+					osc.connect(masterGain);
+					osc.start(note_start_time);
+					
+					// check for prolonging of note
+					var j = i;
+					var note_length = quarterNoteTime;
+					
+					while (keys[j+1] < -1){
+						
+						if (keys[j+1] == -2){
+							note_length += quarterNoteTime;
+						}
+						
+						if (keys[j+1] == -3){
+							note_length -= 0.5 * quarterNoteTime;
+						}						
+						
+						j++;
+					
+					}
+					
+					var note_stop_time = note_start_time + note_length - 0.1;
+					osc.stop(note_stop_time);
+					
+					
+					note_start_time += note_length;
+				}
+			
+			}
+			
+			if (QueryString.score){
+			
+				var score = decodeURI(QueryString.score);
+				
+				g("textarea").value = score;
+				refreshScoreLink(score);
+			
+			}
+			
+			
+			if (QueryString.autoplay && QueryString.autoplay == "true"){
+			
+				play();
+			
+			}			
+			
+		</script>
+
+
+	</body>
+</html>

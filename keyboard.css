@@ -1,0 +1,96 @@
+﻿.keyboard {
+	zoom: 120%;
+	position: relative;
+	width: 1041px;
+	height: 120px;  
+	margin-left: auto;
+	margin-right: auto;
+}
+
+
+.octave {
+	position: absolute; 
+	bottom: 0px;
+	left: 0px;
+}
+
+
+.key {
+	margin: 0px;
+	position: absolute;
+
+	border-style: solid;
+	border-top-width: 1px;
+	border-bottom-width: 1px;
+	border-left-width: 1px;
+	border-color: rgb(161, 161, 161);
+}
+.key:focus{
+	outline: none !important;  /* overwrite chrome default */
+}
+
+
+.whitekey {
+	width: 20px;
+	padding: 0px;
+	height: 120px;
+	bottom: 0px;
+	position:absolute;
+	z-index:5;
+	background-color:white;
+
+	border-right-width: 0px;
+	
+	display:inline-block;
+}
+.whitekey:hover, .whitekey.hover {
+	background-color:#00FF00;
+}
+.whitekey:active, .whitekey.active {
+	background-color:#FF0066;
+
+}
+
+
+#b87{
+	border-right-width: 1px;
+}
+
+
+.blackkey {
+	width: 13px;
+	padding: 0px;
+	height: 60px;
+	background-color: black;
+	z-index: 10;
+	bottom: 60px;
+
+	border-right-width: 1px;
+	
+	display: inline-block;
+}
+.blackkey:hover, .blackkey.hover{
+	background-color:#00CCCC;
+}
+.blackkey:active, .blackkey.active{
+	background-color:#FF0066;
+}
+
+.whitekey .key_label{
+	font-family: arial;
+	text-decoration:none;
+	font-size: 8pt;
+	
+    position: relative;
+    bottom: -46px;
+}
+
+.blackkey .key_label{
+	font-family: arial;
+	text-decoration:none;
+	font-size: 6pt;
+	color: white;
+	
+    position: relative;
+	bottom: -20px;
+}
