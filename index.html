@@ -322,15 +322,17 @@
 			
 				for (var i = 0; i < length; i++){
 					
-					if (keys[i] < 0){
+					if (keys[i] < -1){
 						continue;
 					}
 					
-					var osc = context.createOscillator();
-					osc.type = "triangle";					
-					osc.frequency.value = getFrequency(keys[i], 0, 440, 0);
-					osc.connect(masterGain);
-					osc.start(note_start_time);
+					if (keys[i] > -1){
+						var osc = context.createOscillator();
+						osc.type = "triangle";				
+						osc.frequency.value = getFrequency(keys[i], 0, 440, 0);
+						osc.connect(masterGain);
+						osc.start(note_start_time);
+					}
 					
 					// check for prolonging of note
 					var j = i;
@@ -351,7 +353,10 @@
 					}
 					
 					var note_stop_time = note_start_time + note_length - 0.1;
-					osc.stop(note_stop_time);
+					
+					if (keys[i] > -1){
+						osc.stop(note_stop_time);
+					}
 					
 					
 					note_start_time += note_length;
