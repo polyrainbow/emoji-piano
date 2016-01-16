@@ -322,10 +322,12 @@
 			
 				for (var i = 0; i < length; i++){
 					
+					//if note is to be shortened or prolongened, it already has been done by while loop
 					if (keys[i] < -1){
 						continue;
 					}
 					
+					// create tone if note is not a rest
 					if (keys[i] > -1){
 						var osc = context.createOscillator();
 						osc.type = "triangle";				
@@ -334,7 +336,7 @@
 						osc.start(note_start_time);
 					}
 					
-					// check for prolonging of note
+					// check for prolonging of note/rest
 					var j = i;
 					var note_length = quarterNoteTime;
 					
