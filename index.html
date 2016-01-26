@@ -257,7 +257,7 @@
 			
 			var keyDown = function(key){
 				
-				textarea.value += CLAVIATURE.config.custom_key_names[key];				
+				insertAtCaret(CLAVIATURE.config.custom_key_names[key]);
 				refreshScoreLink(textarea.value);
 				
 				var osc = context.createOscillator();
@@ -286,6 +286,8 @@
 				var caretPos = textarea.selectionStart;
 				var textAreaTxt = textarea.value;
 				textarea.value = textAreaTxt.substring(0, caretPos) + txtToAdd + textAreaTxt.substring(caretPos);
+				textarea.selectionStart = caretPos + txtToAdd.length;
+				textarea.selectionEnd = caretPos + txtToAdd.length;
 				
 			}
 			
