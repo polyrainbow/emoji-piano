@@ -37,7 +37,8 @@
 		</div>
 		<div style="text-align:center; margin: 15px;" id="controls">
 			<input id="button_play" type="button" value="Play"> 
-			<input id="button_halve_note_length" type="button" value="Note Length * 1/2">
+			<input id="button_halve_note_length" type="button" value="Note Length / 2">
+			<input id="button_dot_note_length" type="button" value="Dot Note">
 			<input id="button_double_note_length" type="button" value="Note Length + 1/4"> 
 			<input id="button_note_length_plus_half" type="button" value="Note Length + 1/8">			
 			<input id="button_insert_rest" type="button" value="Insert Rest"> 
@@ -330,7 +331,7 @@
 			});
 
 			
-			g("button_note_length_plus_half").addEventListener("click", function(){
+			g("button_dot_note_length").addEventListener("click", function(){
 			
 				insertAtCaret("🔴");
 				refreshScoreLink(textarea.value);
@@ -340,7 +341,8 @@
 			
 			var playKeys = function(keys){
 			
-				var quarterNoteTime = 0.5;
+				var bpm = 120;			
+				var quarterNoteTime = bpm / 60 / 4;
 				var note_start_time = context.currentTime + 0.2;
 				
 				var length = keys.length;
@@ -365,7 +367,7 @@
 						gain.connect(masterGain);
 					}
 					
-					// check for prolonging of note/rest
+					// check for manipulation of note/rest length
 					var j = i;
 					var note_length = quarterNoteTime;
 					
@@ -379,14 +381,18 @@
 							note_length /= 2;
 						}	
 
+						// dotted note length = (2 - ( 1 / Math.pos(2, n) ) , when n = number of dots after a note
+						// compare https://en.wikipedia.org/wiki/Dotted_note
+						// currently, we do not check how many dots there are after a note, so we'll always multiply by the half of the complete note length
+						// this could be improved!
 						if (keys[j+1] == -4){
-							note_length += 0.5 * quarterNoteTime;
+							note_length += 0.5 * note_length;
 						}							
 						
 						j++;
 					
 					}
-					console.log(note_length);
+					
 					var note_stop_time = note_start_time + note_length - (note_length/5);
 					
 					if (keys[i] > -1){
@@ -397,7 +403,7 @@
 						
 					}
 					
-					
+					// this will also be added, if a rest is given
 					note_start_time += note_length;
 				}
 			
