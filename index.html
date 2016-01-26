@@ -154,6 +154,8 @@
 			
 			};
 
+			var bpm = 120;
+			
 			var textarea = g("textarea");
 			
 			var context = new AudioContext();
@@ -341,8 +343,7 @@
 			
 			var playKeys = function(keys){
 			
-				var bpm = 120;			
-				var quarterNoteTime = bpm / 60 / 4;
+				var quarterNoteTime = 60 / bpm;
 				var note_start_time = context.currentTime + 0.2;
 				
 				var length = keys.length;
@@ -418,13 +419,24 @@
 			
 			}
 			
+			if (QueryString.bpm){
+			
+				var value = parseInt(QueryString.bpm);
+				
+				if (!isNaN(value) && value >= 30 && value <= 200){ 
+			
+					bpm = value;
+					
+				}
+			
+			}
 			
 			if (QueryString.autoplay && QueryString.autoplay == "true"){
 			
 				play();
 			
-			}			
-			
+			}
+
 		</script>
 
 
