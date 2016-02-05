@@ -163,6 +163,9 @@
 			var masterGain = context.createGain();
 			masterGain.connect(context.destination);
 			masterGain.gain.value = 0.3;
+			
+			var notes = [];
+			var isPlaying = false;
 		
 			CLAVIATURE.create({
 				container_id: "piano_container",
@@ -343,10 +346,20 @@
 			
 			var playKeys = function(keys){
 			
+				if (isPlaying){
+					return;
+				}
+				
+				else {
+					isPlaying = true;
+				}
+			
 				var quarterNoteTime = 60 / bpm;
 				var note_start_time = context.currentTime + 0.2;
 				
 				var length = keys.length;
+				
+				notes = [];
 			
 				for (var i = 0; i < length; i++){
 					
@@ -366,6 +379,9 @@
 						
 						osc.connect(gain);
 						gain.connect(masterGain);
+						
+						notes.push({key: keys[i], start_time: note_start_time});
+						
 					}
 					
 					// check for manipulation of note/rest length
@@ -398,6 +414,7 @@
 					
 					if (keys[i] > -1){
 						osc.stop(note_stop_time);
+						notes[notes.length - 1].stop_time = note_stop_time;
 						
 						gain.gain.setValueAtTime(gain.gain.value, note_stop_time - 0.03);
 						gain.gain.exponentialRampToValueAtTime(0.0001, note_stop_time);
@@ -407,8 +424,42 @@
 					// this will also be added, if a rest is given
 					note_start_time += note_length;
 				}
+				
+				draw();
 			
 			}
+			
+			
+			var draw = function(){
+			
+				for (var k = 0; k < 88; k++){
+				
+					g("b" + k).classList.remove("active");
+				
+				}
+			
+				var time = context.currentTime;
+				var index = 0;
+			
+				while ((index < notes.length - 1) && (notes[index].stop_time <= time)){
+				
+					index++;
+				
+				}
+				
+				if (notes[index].start_time <= time && notes[index].stop_time >= time){
+					g("b" + notes[index].key).classList.add("active");
+				}
+
+				if (index == notes.length - 1 && notes[index].stop_time < time){
+					isPlaying = false;
+					return;
+				}
+			
+				requestAnimationFrame(draw);
+			
+			}
+			
 			
 			if (QueryString.score){
 			
