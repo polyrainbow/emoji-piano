@@ -48,12 +48,14 @@
 			<input id="button_double_note_length" type="button" value="Note Length + 1/4">
 			<input id="button_insert_rest" type="button" value="Insert Rest">
 			<input id="button_clear" type="button" value="Clear">
+			BPM: <input id="input_bpm" type="number" min="30" max="200" value="120" step="1">
 		</div>
 		<div id="piano_container"></div>
 		<div style="text-align:center; margin-top: 30px;">
 			<p style="margin: 0px;">To share your melody, copy the emojis from the textarea above or copy this link:<br>
 				<span><a id="score_link" href="https://webaudiotech.com/sites/emoji_piano?score=">https://webaudiotech.com/sites/emoji_piano?score=</a></span>
 			</p>
+			<p><input type="checkbox" id="checkbox_autoplay"> Automatic playback when opening link</p>
 		</div>
 		<div style="text-align:center; margin-top: 30px;">
 			<a href="https://webaudiotech.com">
@@ -110,6 +112,13 @@
 
 				var score_link = g("score_link");
 				var link = "https://webaudiotech.com/sites/emoji_piano?score=" + score;
+
+				if (g("checkbox_autoplay").checked){
+					link += "&autoplay=true"
+				}
+
+				link += "&bpm=" + bpm;
+
 				score_link.innerHTML = link;
 				score_link.href = link;
 
@@ -508,6 +517,7 @@
 				if (!isNaN(value) && value >= 30 && value <= 200){
 
 					bpm = value;
+					g("input_bpm").value = bpm;
 
 				}
 
@@ -515,9 +525,20 @@
 
 			if (QueryString.autoplay && QueryString.autoplay == "true"){
 
+				g("checkbox_autoplay").checked = true;
+				refreshScoreLink(textarea.value);
 				play();
 
 			}
+
+			g("checkbox_autoplay").addEventListener("change", function(){
+				refreshScoreLink(textarea.value);
+			})
+
+			g("input_bpm").addEventListener("input", function(e){
+				bpm = e.target.value;
+				refreshScoreLink(textarea.value);
+			})
 
 		</script>
 
