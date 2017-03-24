@@ -437,9 +437,8 @@
 			var draw = function(){
 
 				for (var k = 0; k < 88; k++){
-
-					g("b" + k).classList.remove("active");
-
+					var btn = g("b" + k);
+					btn && btn.classList.remove("active");
 				}
 
 				var time = context.currentTime;
@@ -452,7 +451,8 @@
 				}
 
 				if (notes[index].start_time <= time && notes[index].stop_time >= time){
-					g("b" + notes[index].key).classList.add("active");
+					var btn = g("b" + notes[index].key)
+					btn && btn.classList.add("active");
 				}
 
 				if (index == notes.length - 1 && notes[index].stop_time < time){
