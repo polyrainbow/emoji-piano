@@ -1,59 +1,19 @@
 ﻿CLAVIATURE = (function () {
 	'use strict';
-	
-	
-	var g = function(id){
-	
-		return document.getElementById(id);
-	
-	};
-	
-	
-	var makeElement = function (element_tag,element_id,element_class,parent_to_append_to,innerHTML){
 
-		var element = document.createElement(element_tag);
-		
-		if (element_id !== ""){
-			element.id = element_id;
-		}
-		
-		if (element_class !== ""){
-			element.className = element_class;
-		}
-		
-		if (typeof parent_to_append_to != "undefined"){
-			parent_to_append_to.appendChild(element);
-		}
-		
-		if (innerHTML){
-		
-			element.innerHTML = innerHTML;
-		
-		}
-		
-		return element;
-	};
-	
-	
-	var makeDiv = function(parent,id,className,innerHTML){
-	
-		var div = makeElement("div",id,className,parent,innerHTML);
-		
-		return div;	
-	
-	};
-	
+	/*********************************************
+		PRIVATE
+	*********************************************/
 
-	//PUBLIC
-	var my = {};
-	
-	my.config = {};
-	
-	my.key_colors = [
+	var config = {};
+	var offset = 0;
+	var k = 0;
+
+	var key_colors = [
 		"white",
 		"black",
 		"white",
-		"black",		
+		"black",
 		"white",
 		"white",
 		"black",
@@ -63,13 +23,13 @@
 		"black",
 		"white"
 	];
-	
-	
-	my.key_names = [
+
+
+	var key_names = [
 		"C",
 		"C#",
 		"D",
-		"D#",		
+		"D#",
 		"E",
 		"F",
 		"F#",
@@ -79,156 +39,217 @@
 		"A#",
 		"B"
 	];
-	
-	
-	my.create = function(config){
-	
-		my.config = {
-			start: config.start_key || 0,
-			end: config.end_key || 88,
-			onmousedown: config.onmousedown || function(){ return; },
-			onclick: config.onclick || function(){ return; },
-			onmouseup: config.onmouseup || function(){ return; },
-			onmouseleave: config.onmouseleave || function(){ return; },
-			onactivate: config.onactivate || function(){ return; },
-			ondeactivate: config.ondeactivate || function(){ return; },
-			container_id: config.container_id || document.body,
-			labels: config.labels || false,
-			id: config.id || "keyboard",
-			className: config.className || "keyboard",
-			custom_key_names: config.custom_key_names || null
-		};		
-		
-		my.renderKeyboard();
-	
-	};
-	
-	
-	my.renderKeyboard = function(){
-	
-		var k = 0;
-		
-		var keyboard = makeDiv(g(my.config.container_id), my.config.id, my.config.className);
-		
-		var o0 = makeDiv(keyboard, "o0", "octave");
-		o0.style.left = octaveLeft + "px";
-		
-		my.createKey(0, 0, o0);
-		my.createKey(1, 14, o0);
-		my.createKey(2, 20, o0);
-		
-		var octaveLeft=40;
-		
-		k = 3;
-		
-		for (var o = 1; o < 8; o++){
-			my.createOctave("o" + o, k, keyboard, octaveLeft);
-			
-			octaveLeft += 140;
-			
-			k = k + 12;
-			
-		}
-		
-		var o8 = makeDiv(keyboard, "o8", "octave");
-		o8.style.left = octaveLeft + "px";
-		my.createKey(87, 0, o8);
-	
-	};
-	
-	
-	my.createKey = function(key, left, parent){
-		
-		if (my.config.custom_key_names){
-			var key_text = my.config.custom_key_names[key];
-		}
-		
-		else {
-			key_text = my.key_names[(key + 9) % 12]; // + octave;
-		}
-		
-		var key_color = my.key_colors[(key + 9) % 12];
-		var octave = Math.floor((key + 9) / 12);
 
-		var button = makeElement("button", "b" + key, "key " + key_color + "key", parent);
-		button.addEventListener("mousedown", function() { my.config.onmousedown(key); my.activateKey(key, key_text); });
-		button.addEventListener("mouseup", function() { my.config.onmouseup(key);  my.deactivateKey(key, key_text); });
-		button.addEventListener("mouseout", function() { my.config.onmouseleave(key);  my.deactivateKey(key, key_text); });	
-		
-		button.style.left = left + "px";
-		
-		if (my.config.labels) {
-		
+
+	var g = function(id){
+		return document.getElementById(id);
+	};
+
+
+	var makeElement = function (element_tag,element_id,element_class,parent_to_append_to,innerHTML){
+
+		var element = document.createElement(element_tag);
+
+		if (element_id !== ""){
+			element.id = element_id;
+		}
+
+		if (element_class !== ""){
+			element.className = element_class;
+		}
+
+		if (typeof parent_to_append_to != "undefined"){
+			parent_to_append_to.appendChild(element);
+		}
+
+		if (innerHTML){
+			element.innerHTML = innerHTML;
+		}
+
+		return element;
+	};
+
+
+	var makeDiv = function(parent, id, className, innerHTML){
+		var div = makeElement("div", id, className, parent, innerHTML);
+		return div;
+	};
+
+
+	var createOctave = function(id, parent){
+		var octave = makeDiv(parent, id, "octave");
+		for (var i = 0; i < 12; i++){
+			createKeyIfInRange(octave);
+		}
+	}
+
+
+	var renderKeyboard = function(){
+
+		var keyboard = makeDiv(g(config.container_id), config.id, config.className);
+
+		var o0 = makeDiv(keyboard, "o0", "octave");
+
+		createKeyIfInRange(o0);
+		createKeyIfInRange(o0);
+		createKeyIfInRange(o0);
+
+		for (var o = 1; o < 8; o++){
+			createOctave("o" + o, keyboard);
+		}
+
+		var o8 = makeDiv(keyboard, "o8", "octave");
+
+		createKeyIfInRange(o8);
+
+		keyboard.style.width = offset + "px";
+		keyboard.style.zoom = config.zoom + "%";
+
+	};
+
+
+	var getMouseDownFunction = function(key, key_text){
+		return function(e) {
+			config.onmousedown(key);
+			activateKey(key, key_text);
+		};
+	}
+
+	var getMouseUpFunction = function(key, key_text){
+		return function(e) {
+			config.onmousedown(key);
+			deactivateKey(key, key_text);
+		};
+	}
+
+	var getMouseOutFunction = function(key, key_text){
+		return function(e) {
+			config.onmouseleave(key);
+			deactivateKey(key, key_text);
+		};
+	}
+
+
+	var renderKey = function(parent){
+
+		var key_in_octave = (k + 9) % 12;
+		var key_color = key_colors[key_in_octave];
+		var octave = Math.floor((k + 9) / 12);
+
+		if (config.custom_key_names){
+			var key_text = config.custom_key_names[k];
+		} else {
+			key_text = key_names[key_in_octave]; // + octave;
+		}
+
+		var button = makeElement("button", "b" + k, "key " + key_color + "key", parent);
+		button.addEventListener("mousedown", getMouseDownFunction(k, key_text));
+		button.addEventListener("mouseup", getMouseUpFunction(k, key_text));
+		button.addEventListener("mouseout", getMouseOutFunction(k, key_text));
+		button.style.left = offset + "px";
+
+		if (config.labels) {
 			var label = makeElement("span", "", "key_label", button);
 			label.innerHTML = key_text;
-		
 		}
-		
+
+		if (key_color == "black"){
+			offset += 6; //black key width is 12, so go a half key further
+		}
+
+		else if ((key_in_octave == 4) || (key_in_octave == 11)){
+			offset += 20; //after key 4 and 11, there's another white key, so go even further than usual
+		}
+
+		else {
+			offset += 14; //after a white key, go 14px further to the right, until the beginning of the next black key
+		}
+		console.log(k);
+		if (k === config.keysToRender[config.keysToRender.length - 1]){
+			button.style.borderRightWidth = "1px";
+		}
+
 		return button;
 
 	}
-	
-	
-	my.activateKey = function(key, note){
-	
+
+
+	var createKeyIfInRange = function(parent){
+
+		if (config.keysToRender.indexOf(k) > -1){
+			var button = renderKey(parent);
+		}
+
+		k++;
+
+		return button;
+
+	}
+
+
+	var activateKey = function(key, note){
 		g("b" + (key)).classList.add("active");
-		
-		my.config.onactivate(key, note);
-		
+		config.onactivate(key, note);
 	};
-	
-	
-	my.deactivateKey = function(key, note){
-		
+
+
+	var deactivateKey = function(key, note){
+
 		if (!g("b" + key)){
 			return false;
 		}
 
 		g("b" + (key)).classList.remove("active");
-		
-		my.config.ondeactivate(key, note);
-		
+		config.ondeactivate(key, note);
+
 	};
 
 
-	my.createOctave = function(id, start_key, parent, octave_left){
+	/*********************************************
+		PUBLIC
+	*********************************************/
 
-		var left = 0;
-		
-		var octave = makeDiv(parent, id, "octave");
-		
-		for (var i = 0; i < 12; i++){
-		
-			my.createKey(start_key + i, left, octave);
-			
-			if (my.key_colors[i] == "black"){ //black key width is 12
-				left += 6;
-			}
-			
-			else if (i == 4){
-				left += 20;
-			}
-			
-			else {
-				left += 14;
-			}
-			
-		}
-		
-		octave.style.left = octave_left + "px";
-		
-	}
+	var my = {};
+
+	my.create = function(user_config){
+
+		config = {
+			start: user_config.start || 0,
+			end: user_config.end || 87,
+			onmousedown: user_config.onmousedown || function(){ return; },
+			onclick: user_config.onclick || function(){ return; },
+			onmouseup: user_config.onmouseup || function(){ return; },
+			onmouseleave: user_config.onmouseleave || function(){ return; },
+			onactivate: user_config.onactivate || function(){ return; },
+			ondeactivate: user_config.ondeactivate || function(){ return; },
+			container_id: user_config.container_id || document.body,
+			labels: user_config.labels || false,
+			id: user_config.id || "keyboard",
+			className: user_config.className || "keyboard",
+			custom_key_names: user_config.custom_key_names || null,
+			zoom: user_config.zoom || 120
+		};
+
+		config.keysToRender = new Array(88);
+		for (var i = 0; i < 88; i++) config.keysToRender[i] = i;
+		config.keysToRender = config.keysToRender.filter(function(item){
+			return ((item >= config.start) && (item <= config.end));
+		});
+
+		my.config = config;
+
+		renderKeyboard();
+
+	};
 
 
 	my.getActiveKeys = function(){
-	
 		// TO DO
-		
 		return;
-		
 	};
-	
-	
+
+	my.config = config;
+
 	return my;
-	
+
 })();

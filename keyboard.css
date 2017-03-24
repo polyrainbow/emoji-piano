@@ -1,15 +1,13 @@
 ﻿.keyboard {
-	zoom: 120%;
 	position: relative;
-	width: 1041px;
-	height: 120px;  
+	height: 120px;
 	margin-left: auto;
 	margin-right: auto;
 }
 
 
 .octave {
-	position: absolute; 
+	position: absolute;
 	bottom: 0px;
 	left: 0px;
 }
@@ -40,7 +38,7 @@
 	background-color:white;
 
 	border-right-width: 0px;
-	
+
 	display:inline-block;
 }
 .whitekey:hover, .whitekey.hover {
@@ -51,12 +49,6 @@
 
 }
 
-
-#b87{
-	border-right-width: 1px;
-}
-
-
 .blackkey {
 	width: 13px;
 	padding: 0px;
@@ -66,7 +58,7 @@
 	bottom: 60px;
 
 	border-right-width: 1px;
-	
+
 	display: inline-block;
 }
 .blackkey:hover, .blackkey.hover{
@@ -80,7 +72,7 @@
 	font-family: arial;
 	text-decoration:none;
 	font-size: 8pt;
-	
+
     position: relative;
     bottom: -46px;
 }
@@ -90,7 +82,7 @@
 	text-decoration:none;
 	font-size: 6pt;
 	color: white;
-	
+
     position: relative;
 	bottom: -20px;
 }
