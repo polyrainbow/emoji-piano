@@ -164,7 +164,7 @@
 		else {
 			offset += 14; //after a white key, go 14px further to the right, until the beginning of the next black key
 		}
-		console.log(k);
+
 		if (k === config.keysToRender[config.keysToRender.length - 1]){
 			button.style.borderRightWidth = "1px";
 		}
