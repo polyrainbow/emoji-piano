@@ -63,27 +63,22 @@
 			</a>
 		</div>
 
-
 		<script src="claviature.js"></script>
 
 		<script>
 
 			var g = function(id){
-
 				return document.getElementById(id);
-
 			}
+
 
 			var getFrequency = function(note, detune, masterTune, transpose){
-
 				// note a with concert pitch is on key 49, since we start at key 0, it is key 48
 				var power = note - 48 + transpose + detune;
-
 				var frequency = masterTune * (Math.pow(2,(power/12)));
-
 				return frequency;
-
 			}
+
 
 			var QueryString = function () {
 			  // This function is anonymous, is executed immediately and
@@ -108,8 +103,8 @@
 				return query_string;
 			} ();
 
-			var refreshScoreLink = function(score){
 
+			var refreshScoreLink = function(score){
 				var score_link = g("score_link");
 				var link = "https://webaudiotech.com/sites/emoji_piano?score=" + score;
 
@@ -118,52 +113,36 @@
 				}
 
 				link += "&bpm=" + bpm;
-
 				score_link.innerHTML = link;
 				score_link.href = link;
-
 			}
 
+
 			var play = function(){
-
 				var scoreString = textarea.value;
-
 				var chars = Array.from(scoreString);
 				console.log(chars);
-
 				var keys = chars.map(function(char){
 
 					if (char == "▸"){
 						return -2;
-					}
-
-					else if (char == "◂"){
+					} else if (char == "◂"){
 						return -3;
-					}
-
-					else if (char == "●"){
+					} else if (char == "●"){
 						return -4;
-					}
-
-					//somewhat unnecessary, but for code readability
-					else if (char == "◼️"){
+					} else if (char == "◼️"){
+						//somewhat unnecessary, but for code readability
 						return -1;
-					}
-
-					else {
+					} else {
 						return CLAVIATURE.config.custom_key_names.indexOf(char);
 					}
 
 				});
 
 				playKeys(keys);
-
-				console.log(keys);
-
 			};
 
 			var bpm = 120;
-
 			var textarea = g("textarea");
 
 			var context = new AudioContext();
