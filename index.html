@@ -55,7 +55,6 @@
 			<p style="margin: 0px;">To share your melody, copy the emojis from the textarea above or copy this link:<br>
 				<span><a id="score_link" href="https://webaudiotech.com/sites/emoji_piano?score=">https://webaudiotech.com/sites/emoji_piano?score=</a></span>
 			</p>
-			<p><input type="checkbox" id="checkbox_autoplay"> Automatic playback when opening link</p>
 		</div>
 		<div style="text-align:center; margin-top: 30px;">
 			<a href="https://webaudiotech.com">
@@ -107,11 +106,6 @@
 			var refreshScoreLink = function(score){
 				var score_link = g("score_link");
 				var link = "https://webaudiotech.com/sites/emoji_piano?score=" + score;
-
-				if (g("checkbox_autoplay").checked){
-					link += "&autoplay=true"
-				}
-
 				link += "&bpm=" + bpm;
 				score_link.innerHTML = link;
 				score_link.href = link;
@@ -121,7 +115,6 @@
 			var play = function(){
 				var scoreString = textarea.value;
 				var chars = Array.from(scoreString);
-				console.log(chars);
 				var keys = chars.map(function(char){
 
 					if (char == "▸"){
@@ -146,6 +139,7 @@
 			var textarea = g("textarea");
 
 			var context = new AudioContext();
+
 			var oscs = [];
 			var masterGain = context.createGain();
 			masterGain.connect(context.destination);
@@ -204,8 +198,6 @@
 						input[1].onmidimessage = MIDIMessageEventHandler;
 					}
 
-
-
 				}
 			};
 
@@ -245,6 +237,16 @@
 
 
 			var keyDown = function(key){
+				/*
+				Even though the resume() function is "somewhat" asynchronous, the
+				resume message is passed to the control message queue before the
+				next osc starts. See also:
+				https://webaudio.github.io/web-audio-api/#dom-baseaudiocontext-resume
+				*/
+				if (context.state === "suspended"){
+					context.resume()
+					.then(() => console.log("Context resumed."));
+				}
 
 				insertAtCaret(CLAVIATURE.config.custom_key_names[key]);
 				refreshScoreLink(textarea.value);
@@ -328,12 +330,14 @@
 
 
 			var playKeys = function(keys){
+				if (context.state === "suspended"){
+					context.resume()
+					.then(() => console.log("Context resumed."));
+				}
 
 				if (isPlaying){
 					return;
-				}
-
-				else {
+				} else {
 					isPlaying = true;
 				}
 
@@ -489,29 +493,13 @@
 			}
 
 			if (QueryString.bpm){
-
 				var value = parseInt(QueryString.bpm);
-
 				if (!isNaN(value) && value >= 30 && value <= 200){
-
 					bpm = value;
 					g("input_bpm").value = bpm;
-
 				}
-
 			}
 
-			if (QueryString.autoplay && QueryString.autoplay == "true"){
-
-				g("checkbox_autoplay").checked = true;
-				refreshScoreLink(textarea.value);
-				play();
-
-			}
-
-			g("checkbox_autoplay").addEventListener("change", function(){
-				refreshScoreLink(textarea.value);
-			})
 
 			g("input_bpm").addEventListener("input", function(e){
 				bpm = e.target.value;
