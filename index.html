@@ -40,7 +40,7 @@
 		</div>
 		<div id="piano_container"></div>
 		<div style="text-align:center; margin-top: 30px;">
-			<p style="margin: 0px;">To share your melody, copy the emojis from the textarea above or copy this link:<br>
+			<p style="margin: 0px;">Copy this link to share your melody:<br>
 				<span><a id="score_link" href=""></a></span>
 			</p>
 		</div>
@@ -154,6 +154,8 @@
 				end: 87,
 				zoom: 150
 			});
+
+			refreshScoreLink("");
 
 
 			var midiAccess;
