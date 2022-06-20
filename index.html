@@ -8,29 +8,17 @@
 
 		<link rel="stylesheet" type="text/css" href="keyboard.css">
 
-		<link rel="apple-touch-icon" sizes="57x57" href="wat_icons/apple-touch-icon-57x57.png">
-		<link rel="apple-touch-icon" sizes="60x60" href="wat_icons/apple-touch-icon-60x60.png">
-		<link rel="apple-touch-icon" sizes="72x72" href="wat_icons/apple-touch-icon-72x72.png">
-		<link rel="apple-touch-icon" sizes="76x76" href="wat_icons/apple-touch-icon-76x76.png">
-		<link rel="apple-touch-icon" sizes="114x114" href="wat_icons/apple-touch-icon-114x114.png">
-		<link rel="apple-touch-icon" sizes="120x120" href="wat_icons/apple-touch-icon-120x120.png">
-		<link rel="apple-touch-icon" sizes="144x144" href="wat_icons/apple-touch-icon-144x144.png">
-		<link rel="apple-touch-icon" sizes="152x152" href="wat_icons/apple-touch-icon-152x152.png">
-		<link rel="apple-touch-icon" sizes="180x180" href="wat_icons/apple-touch-icon-180x180.png">
 		<link rel="icon" type="image/png" href="wat_icons/favicon-32x32.png" sizes="32x32">
 		<link rel="icon" type="image/png" href="wat_icons/android-chrome-192x192.png" sizes="192x192">
 		<link rel="icon" type="image/png" href="wat_icons/favicon-96x96.png" sizes="96x96">
 		<link rel="icon" type="image/png" href="wat_icons/favicon-16x16.png" sizes="16x16">
-		<meta name="msapplication-TileColor" content="#2b5797">
-		<meta name="msapplication-TileImage" content="wat_icons/mstile-144x144.png">
 		<meta name="theme-color" content="#ffffff">
 
 		<meta property="og:title" content="Emoji Piano" />
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://webaudiotech.com/sites/emoji_piano" />
-		<meta property="og:image" content="https://webaudiotech.com/sites/emoji_piano/title_image.png" />
+		<meta property="og:url" content="https://SebastianZimmer.github.io/emoji-piano" />
+		<meta property="og:image" content="https://SebastianZimmer.github.io/emoji-piano/title_image.png" />
 		<meta property="og:description" content="Share melodies via emojis." />
-
 	</head>
 
 	<body id="body">
@@ -53,23 +41,16 @@
 		<div id="piano_container"></div>
 		<div style="text-align:center; margin-top: 30px;">
 			<p style="margin: 0px;">To share your melody, copy the emojis from the textarea above or copy this link:<br>
-				<span><a id="score_link" href="https://webaudiotech.com/sites/emoji_piano?score=">https://webaudiotech.com/sites/emoji_piano?score=</a></span>
+				<span><a id="score_link" href=""></a></span>
 			</p>
-		</div>
-		<div style="text-align:center; margin-top: 30px;">
-			<a href="https://webaudiotech.com">
-				<img style="width: 75px;" src="https://webaudiotech.com/wp-content/uploads/2015/12/cropped-wat_logo_transparent.png">
-			</a>
 		</div>
 
 		<script src="claviature.js"></script>
 
 		<script>
-
 			var g = function(id){
 				return document.getElementById(id);
 			}
-
 
 			var getFrequency = function(note, detune, masterTune, transpose){
 				// note a with concert pitch is on key 49, since we start at key 0, it is key 48
@@ -104,9 +85,9 @@
 
 
 			var refreshScoreLink = function(score){
+				const { origin, pathname } = window.location;
 				var score_link = g("score_link");
-				var link = "https://webaudiotech.com/sites/emoji_piano?score=" + score;
-				link += "&bpm=" + bpm;
+				var link = `${origin}${pathname}?score=${score}&bpm=${bpm}`;
 				score_link.innerHTML = link;
 				score_link.href = link;
 			}
