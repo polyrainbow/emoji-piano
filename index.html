@@ -16,8 +16,8 @@
 
 		<meta property="og:title" content="Emoji Piano" />
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://SebastianZimmer.github.io/emoji-piano" />
-		<meta property="og:image" content="https://SebastianZimmer.github.io/emoji-piano/title_image.png" />
+		<meta property="og:url" content="https://polyrainbow.github.io/emoji-piano" />
+		<meta property="og:image" content="https://polyrainbow.github.io/emoji-piano/title_image.png" />
 		<meta property="og:description" content="Share melodies via emojis." />
 	</head>
 
@@ -59,31 +59,6 @@
 				return frequency;
 			}
 
-
-			var QueryString = function () {
-			  // This function is anonymous, is executed immediately and
-			  // the return value is assigned to QueryString!
-			  var query_string = {};
-			  var query = window.location.search.substring(1);
-			  var vars = query.split("&");
-			  for (var i=0;i<vars.length;i++) {
-				var pair = vars[i].split("=");
-					// If first entry with this name
-				if (typeof query_string[pair[0]] === "undefined") {
-				  query_string[pair[0]] = pair[1];
-					// If second entry with this name
-				} else if (typeof query_string[pair[0]] === "string") {
-				  var arr = [ query_string[pair[0]], pair[1] ];
-				  query_string[pair[0]] = arr;
-					// If third or later entry with this name
-				} else {
-				  query_string[pair[0]].push(pair[1]);
-				}
-			  }
-				return query_string;
-			} ();
-
-
 			var refreshScoreLink = function(score){
 				const { origin, pathname } = window.location;
 				var score_link = g("score_link");
@@ -116,8 +91,8 @@
 				playKeys(keys);
 			};
 
-			var bpm = 120;
-			var textarea = g("textarea");
+			let bpm = 120;
+			const textarea = g("textarea");
 
 			var context = new AudioContext();
 
@@ -157,10 +132,8 @@
 
 			refreshScoreLink("");
 
-
 			var midiAccess;
 
-			//start up midi api
 			var onMIDIInit = function(midi) {
 				midiAccess = midi;
 				console.log("MIDI initialized!");
@@ -200,7 +173,6 @@
 
 
 			var MIDIMessageEventHandler = function(event) {
-
 				// Mask off the lower nibble (MIDI channel, which we don't care about)
 				switch (event.data[0] & 0xf0) {
 
@@ -215,11 +187,10 @@
 						keyUp(event.data[1]-21);
 						return;
 				}
-
 			};
 
 
-			var keyDown = function(key){
+			const keyDown = function(key) {
 				/*
 				Even though the resume() function is "somewhat" asynchronous, the
 				resume message is passed to the control message queue before the
@@ -231,7 +202,7 @@
 					.then(() => console.log("Context resumed."));
 				}
 
-				insertAtCaret(CLAVIATURE.config.custom_key_names[key]);
+				insertNotation(CLAVIATURE.config.custom_key_names[key]);
 				refreshScoreLink(textarea.value);
 
 				var osc = context.createOscillator();
@@ -240,79 +211,96 @@
 				osc.connect(masterGain);
 				osc.start();
 				oscs[key] = osc;
-
 			}
 
-			var keyUp = function(key, note){
-
+			const keyUp = function(key, note){
 				if (oscs[key]){
-
 					oscs[key].stop();
 					delete(oscs[key]);
+				}
+			}
 
+
+			const insertNotation = function(stringToAdd) {
+				const selection = getSelection();
+				if (selection.anchorNode === textarea) {
+					const stringToAddCharLength = Array.from(stringToAdd).length;
+					const caretPos = textarea.selectionStart;
+					const textAreaTxt = textarea.value;
+					textarea.value = textAreaTxt.substring(0, caretPos)
+						+ stringToAdd
+						+ textAreaTxt.substring(caretPos);
+					textarea.selectionStart = caretPos + stringToAddCharLength;
+					textarea.selectionEnd = caretPos + stringToAddCharLength;
+				} else {
+					textarea.value += stringToAdd;
 				}
 
 			}
 
 
-			var insertAtCaret = function(txtToAdd){
-
-				var caretPos = textarea.selectionStart;
-				var textAreaTxt = textarea.value;
-				textarea.value = textAreaTxt.substring(0, caretPos) + txtToAdd + textAreaTxt.substring(caretPos);
-				textarea.selectionStart = caretPos + txtToAdd.length;
-				textarea.selectionEnd = caretPos + txtToAdd.length;
-
-			}
-
-
 			g("button_clear").addEventListener("click", function(){
-
 				textarea.value = "";
 				refreshScoreLink("");
-
 			});
 
 			g("button_play").addEventListener("click", function(){
-
 				play();
-
 			});
 
 
 			g("button_insert_rest").addEventListener("click", function(){
-
-				insertAtCaret("◼️");
+				insertNotation("◼️");
 				refreshScoreLink(textarea.value);
-
 			});
 
 
 			g("button_double_note_length").addEventListener("click", function(){
-
-				insertAtCaret("▸");
+				insertNotation("▸");
 				refreshScoreLink(textarea.value);
-
 			});
 
 
 			g("button_halve_note_length").addEventListener("click", function(){
-
-				insertAtCaret("◂");
+				insertNotation("◂");
 				refreshScoreLink(textarea.value);
-
 			});
 
 
 			g("button_dot_note_length").addEventListener("click", function(){
-
-				insertAtCaret("●");
+				insertNotation("●");
 				refreshScoreLink(textarea.value);
-
 			});
 
 
-			var playKeys = function(keys){
+			const draw = function() {
+				for (var k = 0; k < 88; k++){
+					const btn = g("b" + k);
+					btn && btn.classList.remove("active");
+				}
+
+				const time = context.currentTime;
+				let index = 0;
+
+				while ((index < notes.length - 1) && (notes[index].stop_time <= time)){
+					index++;
+				}
+
+				if (notes[index].start_time <= time && notes[index].stop_time >= time){
+					const btn = g("b" + notes[index].key)
+					btn && btn.classList.add("active");
+				}
+
+				if (index == notes.length - 1 && notes[index].stop_time < time){
+					isPlaying = false;
+					return;
+				}
+
+				requestAnimationFrame(draw);
+			}
+
+
+			const playKeys = function(keys){
 				if (context.state === "suspended"){
 					context.resume()
 					.then(() => console.log("Context resumed."));
@@ -351,7 +339,6 @@
 						gain.connect(masterGain);
 
 						notes.push({key: keys[i], start_time: note_start_time});
-
 					}
 
 					// check for manipulation of note/rest length
@@ -396,101 +383,32 @@
 				}
 
 				draw();
-
 			}
 
+			let score;
 
-			var draw = function(){
+			const urlParams = new URLSearchParams(window.location.search);
+			const scoreParam = urlParams.get('score');
+			bpmFromQueryString = urlParams.get('bpm');
 
-				for (var k = 0; k < 88; k++){
-					var btn = g("b" + k);
-					btn && btn.classList.remove("active");
-				}
-
-				var time = context.currentTime;
-				var index = 0;
-
-				while ((index < notes.length - 1) && (notes[index].stop_time <= time)){
-
-					index++;
-
-				}
-
-				if (notes[index].start_time <= time && notes[index].stop_time >= time){
-					var btn = g("b" + notes[index].key)
-					btn && btn.classList.add("active");
-				}
-
-				if (index == notes.length - 1 && notes[index].stop_time < time){
-					isPlaying = false;
-					return;
-				}
-
-				requestAnimationFrame(draw);
-
-			}
-
-
-			var replaceLegacyEmojis = function(score){
-
-				var map = {
-					"🔴": "●",
-					"▶️": "▸",
-					"◀️": "◂",
-
-					"🙈": "🐚",
-					'🎄': '🍉',
-					'🍕': '🍍',
-					'🎍': '🍅',
-					'🐲': '🍒',
-					'🐉': '🍇',
-
-					//in future, when Firefox supports Unicode 9.0.0 emojis
-					//'🙉': '🦍',
-					//'🙊': '🦌',
-					//'🐽': '🦏'
-					//🦅🦉🦎🦈🦐🦑🦋
-
-				};
-
-				for (key in map){
-					while (score.indexOf(key) > -1){
-						console.log("Replacing " + key + " with " + map[key]);
-						score = score.replace(key, map[key]);
-					}
-				}
-
-				return score;
-
-			}
-
-
-			if (QueryString.score){
-
-				var score = decodeURI(QueryString.score);
-				score = replaceLegacyEmojis(score);
-
+			if (scoreParam) {
+				score = decodeURIComponent(scoreParam);
 				g("textarea").value = score;
 				refreshScoreLink(score);
-
 			}
 
-			if (QueryString.bpm){
-				var value = parseInt(QueryString.bpm);
+			if (bpmFromQueryString) {
+				var value = parseInt(bpmFromQueryString);
 				if (!isNaN(value) && value >= 30 && value <= 200){
 					bpm = value;
 					g("input_bpm").value = bpm;
 				}
 			}
 
-
 			g("input_bpm").addEventListener("input", function(e){
 				bpm = e.target.value;
 				refreshScoreLink(textarea.value);
 			})
-
 		</script>
-
-
 	</body>
 </html>
